@@ -1,10 +1,13 @@
 import pandas as pd
 from termcolor import cprint
 import math
+import os
+
+# name of root directory
+dirname = os.path.dirname(__file__)
 
 
 def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
-
     """
     Sets the breakout rooms for attendees and writes the results
     to csv files.
@@ -22,6 +25,9 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
     df = pd.read_excel(data_file)
     # replace with your columns of interest
     df = df[['Name', 'School Email', workshop_column]]
+    # clean the data columns of interest
+    df["Name"] = df["Name"].apply(lambda x: x.replace(",", ""))
+    
     id_column = "ID"
     df[id_column] = df["Name"] + "," + df["School Email"]
     df[workshop_column] = df[workshop_column].apply(lambda x: str(x).split(", "))
@@ -47,7 +53,7 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
 
     # Maximum participants per breakout room
     MAX = math.ceil(len(df) / len(room_list)) + 1
-
+    
     # email addresses of people already assigned
     already_assigned = set()
     # maps speakers -> email addresses of attendees preassigned to their room
@@ -64,9 +70,10 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
             for i, row in df.iterrows():
                 if len(room_assignments[speaker]) > MAX:
                     break
-                if row[id_column] not in already_assigned and len(row[workshop_column]) > index and row[workshop_column][index] == speaker:
-                            already_assigned.add(row[id_column])
-                            room_assignments[speaker].append(row[id_column])
+                if row[id_column] not in already_assigned and len(row[workshop_column]) > index and \
+                        row[workshop_column][index] == speaker:
+                    already_assigned.add(row[id_column])
+                    room_assignments[speaker].append(row[id_column])
 
     # assigns attendees who did not enter preferences for workshop 1 so were not assigned earlier, based on workshops with most available space
     room_list.sort(key=lambda x: len(room_assignments[x]))
@@ -90,28 +97,34 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
         for email in room_assignments[room]:
             output_string += 'room' + str(breakout_room_num) + "," + email + "\n"
 
-    # writes to csv the breakout room number -> which speaker is assigned to it
-    breakout_room_num_file = open(f"/Users/alexguo/Desktop/registration-startup/" + workshop_column + "_room_codes.csv", "w")
-    breakout_room_num_file.write (speaker_to_breakout_room)
+    # writes to csv the zoom breakout room number each speaker is assigned to
+    breakout_room_num_file = open(f"" + dirname + workshop_column + "_room_codes.csv",
+                                  "w")
+    breakout_room_num_file.write(speaker_to_breakout_room)
     breakout_room_num_file.close()
 
-    # writes to csv the final attendee room preassignments
-    output_file = open(f"/Users/alexguo/Desktop/registration-startup/" + workshop_column + "_assignments.csv", "w")
+    # writes to csv the attendee preassignments
+    output_file = open(f"" + dirname + workshop_column + "_assignments.csv", "w")
     output_file.write(output_string)
     output_file.close()
-    cprint("Writing to the CSVs " + workshop_column + "_assignments.csv and " + workshop_column + "_room_codes.csv was successful!", "green")
+    cprint(
+        "Writing to the CSVs " + workshop_column + "_assignments.csv and " + workshop_column + "_room_codes.csv was successful!",
+        "green")
     print()
 
 
-# Calls above function using based on 2021 conference ignore lists and data
+# Paths to the source excel file
+excel_data = os.path.join(dirname, 'first_version_of_startup_registration.xlsx')
 
-# Choices to ignore because speakers canceled/etc
+# Calls above function using based on 2021 conference ignore lists and data
 workshop_1_ignore = ['Adam Alpert: 10 Lessons Learned on the Journey from B-Lab to Y Combinator', 'nan']
-workshop_2_ignore = ['Adam Alpert: 10 Lessons Learned on the Journey from B-Lab to Y Combinator', "Cassandra Carothers: Breaking into VC – A Circuitous Path (spoiler alert: there's no perfect way)", 'Cheryl McCants: Workshop Title Coming Soon!','nan']
-workshop_3_ignore = ['Lorine Pendleton: Workshop Title Coming Soon!', "Ben Simon: Investors Suck And You Don't Need Them", 'nan']
+workshop_2_ignore = ['Adam Alpert: 10 Lessons Learned on the Journey from B-Lab to Y Combinator',
+                     "Cassandra Carothers: Breaking into VC – A Circuitous Path (spoiler alert: there's no perfect way)",
+                     'Cheryl McCants: Workshop Title Coming Soon!', 'nan']
+workshop_3_ignore = ['Lorine Pendleton: Workshop Title Coming Soon!',
+                     "Ben Simon: Investors Suck And You Don't Need Them", 'nan']
 
 # Call to set_breakout_room to write to CSV
-excel_data = "/Users/alexguo/Desktop/registration-startup/first_version_of_startup_registration.xlsx"
 set_breakout_rooms(excel_data, "Workshop_1", workshop_1_ignore)
 set_breakout_rooms(excel_data, "Workshop_2", workshop_2_ignore)
 set_breakout_rooms(excel_data, "Workshop_3", workshop_3_ignore)

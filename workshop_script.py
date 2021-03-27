@@ -2,6 +2,7 @@ import pandas as pd
 from termcolor import cprint
 import math
 
+
 def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
 
     """
@@ -96,12 +97,12 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
     print()
 
 
-#Choices to ignore because speakers canceled/etc
+# Choices to ignore because speakers canceled/etc
 workshop_1_ignore = ['Adam Alpert: 10 Lessons Learned on the Journey from B-Lab to Y Combinator', 'nan']
 workshop_2_ignore = ['Adam Alpert: 10 Lessons Learned on the Journey from B-Lab to Y Combinator', "Cassandra Carothers: Breaking into VC – A Circuitous Path (spoiler alert: there's no perfect way)", 'Cheryl McCants: Workshop Title Coming Soon!','nan']
 workshop_3_ignore = ['Lorine Pendleton: Workshop Title Coming Soon!', "Ben Simon: Investors Suck And You Don't Need Them", 'nan']
 
-#Call to set_breakout_room to write to CSV
+# Call to set_breakout_room to write to CSV
 set_breakout_rooms("/Users/alexguo/Desktop/registration-startup/first_version_of_startup_registration.xlsx", "Workshop_1", workshop_1_ignore)
 set_breakout_rooms("/Users/alexguo/Desktop/registration-startup/first_version_of_startup_registration.xlsx", "Workshop_2", workshop_2_ignore)
 set_breakout_rooms("/Users/alexguo/Desktop/registration-startup/first_version_of_startup_registration.xlsx", "Workshop_3", workshop_3_ignore)

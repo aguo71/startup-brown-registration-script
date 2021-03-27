@@ -2,13 +2,14 @@ import pandas as pd
 from termcolor import cprint
 import math
 
-def sets_breakout_rooms(workshop_column: str, ignore: list):
+def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
 
     """
     Sets the breakout rooms for attendees and writes the results
     to csv files.
     
     Parameters:
+    data_file (str): the absolute path to the excel data file
     workshop_column (str): the column in the source excel file where the workshop data choices are located.
     ignore (list): the list of workshops/speakers who are in the data but are no longer participating/canceled.
   
@@ -18,9 +19,10 @@ def sets_breakout_rooms(workshop_column: str, ignore: list):
     """
 
     # replace with your filename
-    df = pd.read_excel("/Users/alexguo/Desktop/registration-startup/first_version_of_startup_registration.xlsx")
+    df = pd.read_excel(data_file)
     df = df[['School Email', workshop_column]]
     df[workshop_column] = df[workshop_column].apply(lambda x: str(x).split(", "))
+    cprint("Data successfully read in from " + data_file, "cyan")
 
     # Determines the order in which we fill the breakout rooms
     rooms = {}
@@ -38,7 +40,7 @@ def sets_breakout_rooms(workshop_column: str, ignore: list):
     # This is the final sorted order in which we assign breakout rooms
     room_list = list(rooms.keys())
     room_list.sort(key=lambda x: rooms[x])
-    cprint(room_list, "cyan")
+    print("Order in which we assigned rooms: " + str(room_list))
 
     # Maximum participants per breakout room
     MAX = math.ceil(len(df) / len(room_list)) + 1
@@ -90,17 +92,16 @@ def sets_breakout_rooms(workshop_column: str, ignore: list):
     output_file = open(f"/Users/alexguo/Desktop/registration-startup/" + workshop_column + "_assignments.csv", "w")
     output_file.write(output_string)
     output_file.close()
-    cprint("Writing to the CSVs " + workshop_column + "_assignments.csv and " + workshop_column + "_room_codes.csv + " was successful!", "green")
+    cprint("Writing to the CSVs " + workshop_column + "_assignments.csv and " + workshop_column + "_room_codes.csv was successful!", "green")
+    print()
 
-# Choices to ignore because speakers canceled/etc
-# workshop_1_ignore = ['Adam Alpert: 10 Lessons Learned on the Journey from B-Lab to Y Combinator', 'nan']
 
-# sets_breakout_rooms("Workshop_1", workshop_1_ignore)
-
-# workshop_2_ignore = ['Adam Alpert: 10 Lessons Learned on the Journey from B-Lab to Y Combinator', "Cassandra Carothers: Breaking into VC – A Circuitous Path (spoiler alert: there's no perfect way)", 'Cheryl McCants: Workshop Title Coming Soon!','nan']
-
-# sets_breakout_rooms("Workshop_2", workshop_2_ignore)
-
+#Choices to ignore because speakers canceled/etc
+workshop_1_ignore = ['Adam Alpert: 10 Lessons Learned on the Journey from B-Lab to Y Combinator', 'nan']
+workshop_2_ignore = ['Adam Alpert: 10 Lessons Learned on the Journey from B-Lab to Y Combinator', "Cassandra Carothers: Breaking into VC – A Circuitous Path (spoiler alert: there's no perfect way)", 'Cheryl McCants: Workshop Title Coming Soon!','nan']
 workshop_3_ignore = ['Lorine Pendleton: Workshop Title Coming Soon!', "Ben Simon: Investors Suck And You Don't Need Them", 'nan']
 
-sets_breakout_rooms("Workshop_3", workshop_3_ignore)
+#Call to set_breakout_room to write to CSV
+set_breakout_rooms("/Users/alexguo/Desktop/registration-startup/first_version_of_startup_registration.xlsx", "Workshop_1", workshop_1_ignore)
+set_breakout_rooms("/Users/alexguo/Desktop/registration-startup/first_version_of_startup_registration.xlsx", "Workshop_2", workshop_2_ignore)
+set_breakout_rooms("/Users/alexguo/Desktop/registration-startup/first_version_of_startup_registration.xlsx", "Workshop_3", workshop_3_ignore)

@@ -88,7 +88,7 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
     # Final output csv format compatable with zoom import from csv breakout room preassignment: room#, email
     output_string = "Pre-assign Room Name,Name,Email Address\n"
     # final output csv format mapping breakout room numbers to the speaker in the room
-    speaker_to_breakout_room = "speaker,id\n"
+    speaker_to_breakout_room = "speaker,room_id\n"
 
     breakout_room_num = 0
     for room in room_assignments:
@@ -98,13 +98,13 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
             output_string += 'room' + str(breakout_room_num) + "," + email + "\n"
 
     # writes to csv the zoom breakout room number each speaker is assigned to
-    breakout_room_num_file = open(f"" + dirname + workshop_column + "_room_codes.csv",
+    breakout_room_num_file = open(f"" + dirname + "results/" + workshop_column + "_room_codes.csv",
                                   "w")
     breakout_room_num_file.write(speaker_to_breakout_room)
     breakout_room_num_file.close()
 
     # writes to csv the attendee preassignments
-    output_file = open(f"" + dirname + workshop_column + "_assignments.csv", "w")
+    output_file = open(f"" + dirname + "results/" + workshop_column + "_assignments.csv", "w")
     output_file.write(output_string)
     output_file.close()
     cprint(

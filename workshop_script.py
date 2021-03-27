@@ -19,9 +19,11 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
 
     """
 
-    # replace with your filename
+    # replace with your filename and the columns of interest
     df = pd.read_excel(data_file)
-    df = df[['School Email', workshop_column]]
+    df = df[['Name', 'School Email', workshop_column]]
+    id_column = "ID"
+    df[id_column] = df["Name"] + "," + df["School Email"]
     df[workshop_column] = df[workshop_column].apply(lambda x: str(x).split(", "))
     cprint("Data successfully read in from " + data_file, "cyan")
 
@@ -51,6 +53,7 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
     already_assigned = set()
     room_assignments = {}
 
+
     for speaker in room_list:
         room_assignments[speaker] = []
         # for loop w / a break condition
@@ -60,22 +63,22 @@ def set_breakout_rooms(data_file: str, workshop_column: str, ignore: list):
             for i, row in df.iterrows():
                 if len(room_assignments[speaker]) > MAX:
                     break
-                if row['School Email'] not in already_assigned and len(row[workshop_column]) > index and row[workshop_column][index] == speaker:
-                            already_assigned.add(row['School Email'])
-                            room_assignments[speaker].append(row['School Email'])
+                if row[id_column] not in already_assigned and len(row[workshop_column]) > index and row[workshop_column][index] == speaker:
+                            already_assigned.add(row[id_column])
+                            room_assignments[speaker].append(row[id_column])
 
     # assigns people who did not enter preferences for workshop 1 based on workshops with most available space
     room_list.sort(key=lambda x: len(room_assignments[x]))
     for i, row in df.iterrows():
-        if row['School Email'] not in already_assigned:
+        if row[id_column] not in already_assigned:
             for speaker in room_list:
                 if len(room_assignments[speaker]) < MAX:
-                    room_assignments[speaker].append(row['School Email'])
-                    already_assigned.add(row['School Email'])
+                    room_assignments[speaker].append(row[id_column])
+                    already_assigned.add(row[id_column])
                     break
 
     # Final output csv format: room#, email
-    output_string = "Pre-assign Room Name,Email Address\n"
+    output_string = "Pre-assign Room Name,Name,Email Address\n"
     speaker_to_breakout_room = "speaker,id\n"
     breakout_room_num = 0
     for room in room_assignments:
